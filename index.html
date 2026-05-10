@@ -27,14 +27,14 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--p50);color:var(--g80
 .phdr h2{font-size:17px;font-weight:600;color:var(--p600);}
 .back-btn{background:none;border:none;cursor:pointer;color:var(--p400);font-size:22px;line-height:1;padding:2px 6px;transition:color .2s;}
 .back-btn:hover{color:var(--p700);}
-
+ 
 /* Loading overlay */
 .loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px;}
 .spinner{width:40px;height:40px;border:3px solid var(--p200);border-top-color:var(--p400);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .loading-text{font-size:14px;color:var(--g500);}
 .loading-overlay.hide{display:none;}
-
+ 
 /* HOME */
 #screen-home{position:relative;align-items:center;justify-content:center;text-align:center;}
 .home-bg{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0;}
@@ -46,7 +46,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--p50);color:var(--g80
 .home-badge{display:inline-block;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:13px;padding:6px 18px;border-radius:50px;margin-bottom:26px;letter-spacing:1px;}
 .home-title{font-size:clamp(28px,6vw,54px);font-weight:700;color:#fff;line-height:1.15;margin-bottom:22px;text-shadow:0 2px 12px rgba(0,0,0,.22);}
 .home-body{font-size:17px;color:rgba(255,255,255,.88);line-height:1.85;margin-bottom:44px;font-weight:300;}
-
+ 
 /* BOOKING */
 #screen-booking{background:var(--p50);}
 .bk-body{flex:1;max-width:740px;width:100%;margin:32px auto;padding:0 20px 56px;}
@@ -72,7 +72,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--p50);color:var(--g80
 .slot-btn.full{border-color:var(--g300);color:var(--g400);background:var(--g100);cursor:not-allowed;opacity:.58;}
 .slot-sub{display:block;font-size:11px;margin-top:3px;opacity:.75;}
 .slots-ph{text-align:center;color:var(--g400);padding:30px 0;font-size:15px;}
-
+ 
 /* FORM */
 #screen-form{background:var(--p50);}
 .fm-body{flex:1;max-width:580px;width:100%;margin:32px auto;padding:0 20px 56px;}
@@ -89,7 +89,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--p50);color:var(--g80
 .f-err.show{display:block;}
 .dup-warn{background:#fff3e0;border:1.5px solid #ffb74d;border-radius:var(--r);padding:13px 16px;font-size:14px;color:#e65100;margin-bottom:18px;display:none;line-height:1.6;}
 .dup-warn.show{display:block;}
-
+ 
 /* SUCCESS */
 #screen-success{align-items:center;justify-content:center;background:var(--p50);padding:32px 20px;}
 .success-card{background:#fff;border-radius:var(--rl);padding:52px 44px;text-align:center;box-shadow:var(--sh-lg);max-width:460px;width:100%;}
@@ -97,7 +97,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--p50);color:var(--g80
 .success-title{font-size:24px;font-weight:700;color:var(--g800);margin-bottom:10px;}
 .success-body{font-size:15px;color:var(--g500);line-height:1.8;margin-bottom:26px;}
 .success-detail{background:var(--p50);border-radius:var(--rm);padding:16px 20px;text-align:left;margin-bottom:28px;font-size:14px;color:var(--p700);line-height:2.1;}
-
+ 
 @media(max-width:600px){
   .bk-body,.fm-body{padding:0 12px 48px;}
   .card{padding:18px 14px;}
@@ -107,13 +107,13 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--p50);color:var(--g80
 </style>
 </head>
 <body>
-
+ 
 <!-- Loading -->
 <div class="loading-overlay hide" id="loading">
   <div class="spinner"></div>
   <div class="loading-text" id="loading-text">載入中…</div>
 </div>
-
+ 
 <!-- HOME -->
 <div id="screen-home" class="screen active">
   <div class="home-bg" id="home-bg"></div>
@@ -127,7 +127,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--p50);color:var(--g80
     <button class="btn btn-primary" onclick="goBooking()">立即預約</button>
   </div>
 </div>
-
+ 
 <!-- BOOKING -->
 <div id="screen-booking" class="screen">
   <div class="phdr">
@@ -150,7 +150,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--p50);color:var(--g80
     </div>
   </div>
 </div>
-
+ 
 <!-- FORM -->
 <div id="screen-form" class="screen">
   <div class="phdr">
@@ -175,7 +175,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--p50);color:var(--g80
     </div>
   </div>
 </div>
-
+ 
 <!-- SUCCESS -->
 <div id="screen-success" class="screen">
   <div class="success-card">
@@ -186,17 +186,17 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--p50);color:var(--g80
     <button class="btn btn-primary" onclick="goHome()" style="width:100%;">返回首頁</button>
   </div>
 </div>
-
+ 
 <script>
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbwSSqYmqX5Fcf5qDRpdn6w35oe9igjA8Gpnvpsq1Jtmag-AfTql4wTuqx1JAQv19Hv4/exec';
-
+ 
 /* ═══ CACHE（當次開啟有效） ═══ */
 var CACHE = { schedule: null, bookings: null, fields: null, settings: null };
-
+ 
 /* ═══ LOADING ═══ */
 function showLoading(msg){ document.getElementById('loading').classList.remove('hide'); document.getElementById('loading-text').textContent = msg||'載入中…'; }
 function hideLoading(){ document.getElementById('loading').classList.add('hide'); }
-
+ 
 /* ═══ GAS 呼叫 ═══ */
 function gasGet(action){
   return fetch(GAS_URL, {
@@ -214,7 +214,7 @@ function gasPost(payload){
   }).then(function(){ return { success: true }; })
     .catch(function(){ return { success: false }; });
 }
-
+ 
 /* ═══ TIME FORMAT 保護 ═══ */
 function fmtTime(t){
   if(!t) return '';
@@ -229,36 +229,36 @@ function fmtTime(t){
   /* 已是 HH:mm 格式直接回傳 */
   return s.trim();
 }
-
+ 
 /* ═══ STATE ═══ */
 var STATE = { date: null, slot: null };
-
+ 
 /* ═══ ROUTER ═══ */
 function showOnly(id){
   document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
 }
-
+ 
 function goHome(){
   showOnly('screen-home');
   loadHomeContent();
 }
-
+ 
 function goBooking(){
   showOnly('screen-booking');
   loadScheduleAndRender();
 }
-
+ 
 function goForm(){
   document.getElementById('sum-dt').textContent = STATE.date + '　' + STATE.slot;
   document.getElementById('dup-warn').classList.remove('show');
   renderFormFields();
   showOnly('screen-form');
 }
-
+ 
 function goSuccess(){ showOnly('screen-success'); }
-
+ 
 /* ═══ HOME ═══ */
 function loadHomeContent(){
   if(CACHE.settings){
@@ -271,7 +271,7 @@ function loadHomeContent(){
     applySettings(s);
   });
 }
-
+ 
 function applySettings(s){
   document.getElementById('home-badge').textContent = s.badge || '專業服務';
   document.getElementById('home-title').textContent = s.title || '歡迎使用線上預約';
@@ -279,14 +279,14 @@ function applySettings(s){
   var bg = s.bg || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80';
   document.getElementById('home-bg').style.backgroundImage = "url('" + bg + "')";
 }
-
+ 
 /* ═══ CALENDAR ═══ */
 var calY, calM;
 (function(){ var n=new Date(); calY=n.getFullYear(); calM=n.getMonth(); })();
 function calPrev(){ calM--; if(calM<0){calM=11;calY--;} renderCalendar(); }
 function calNext(){ calM++; if(calM>11){calM=0;calY++;} renderCalendar(); }
 function pad(n){ return String(n).padStart(2,'0'); }
-
+ 
 function loadScheduleAndRender(){
   /* 每次進入預約頁都重新從試算表讀取，確保資料最新 */
   showLoading('載入可預約日期…');
@@ -305,7 +305,7 @@ function loadScheduleAndRender(){
     toast('⚠️ 無法取得最新資料，顯示上次快取');
   });
 }
-
+ 
 function renderCalendar(){
   var schedule = CACHE.schedule || {};
   var labels = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
@@ -334,14 +334,14 @@ function renderCalendar(){
     grid.appendChild(el);
   }
 }
-
+ 
 function selectDate(ds){
   STATE.date=ds; STATE.slot=null;
   renderCalendar();
   renderSlots(ds);
   document.getElementById('slots-content').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-
+ 
 function renderSlots(ds){
   var schedule = CACHE.schedule || {};
   var bookings = CACHE.bookings || [];
@@ -375,7 +375,7 @@ function renderSlots(ds){
   });
   wrap.appendChild(grid);
 }
-
+ 
 /* ═══ FORM ═══ */
 function renderFormFields(){
   var fields = CACHE.fields || defaultFields();
@@ -394,7 +394,7 @@ function renderFormFields(){
     wrap.appendChild(div);
   });
 }
-
+ 
 function defaultFields(){
   return [
     {id:'name',  label:'姓名',    type:'text',     required:true},
@@ -403,14 +403,14 @@ function defaultFields(){
     {id:'note',  label:'其他備註', type:'textarea', required:false}
   ];
 }
-
+ 
 function submitForm(){
   var fields = CACHE.fields || defaultFields();
   var valid=true;
   var rec={ date:STATE.date, time:STATE.slot, status:'pending', createdAt:new Date().toLocaleString('zh-TW') };
   var warnEl = document.getElementById('dup-warn');
   warnEl.classList.remove('show');
-
+ 
   fields.forEach(function(f){
     var el=document.getElementById('f-'+f.id);
     var err=document.getElementById('fe-'+f.id);
@@ -421,9 +421,9 @@ function submitForm(){
     else if(f.type==='tel'&&val&&!/^09\d{8}$/.test(val.replace(/\s/g,''))){ err.textContent='請輸入正確手機號碼（09xxxxxxxx）'; err.classList.add('show'); valid=false; }
     rec[f.id]=val;
   });
-
+ 
   if(!valid) return;
-
+ 
   /* 防重複預約：比對手機和 Email（欄位可能是英文 id 或中文 label） */
   var bookings = CACHE.bookings || [];
   var dup = bookings.some(function(b){
@@ -442,7 +442,7 @@ function submitForm(){
     warnEl.classList.add('show');
     return;
   }
-
+ 
   /* 即時名額確認 */
   var schedule = CACHE.schedule || {};
   var slotCfg = (schedule[STATE.date]||[]).find(function(s){ return s.time===STATE.slot; });
@@ -456,7 +456,7 @@ function submitForm(){
       return;
     }
   }
-
+ 
   showLoading('送出預約中…');
   gasPost({ action:'saveBooking', booking:rec }).then(function(){
     /* 更新 cache */
@@ -468,7 +468,7 @@ function submitForm(){
     goSuccess();
   });
 }
-
+ 
 /* ═══ INIT ═══ */
 showLoading('載入中…');
 Promise.all([
@@ -481,6 +481,8 @@ Promise.all([
   CACHE.fields   = results[1].fields   || defaultFields();
   CACHE.bookings = results[2].bookings || [];
   CACHE.schedule = results[3].schedule || {};
+  console.log('bookings:', JSON.stringify(CACHE.bookings.slice(0,3)));
+  console.log('schedule:', JSON.stringify(CACHE.schedule));
   applySettings(CACHE.settings);
   hideLoading();
 }).catch(function(){
@@ -490,3 +492,4 @@ Promise.all([
 </script>
 </body>
 </html>
+ 
