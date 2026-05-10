@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理後台｜線上預約系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p50:#f3f0ff;--p100:#ede7f6;--p200:#d1c4e9;--p300:#b39ddb;
+  --p400:#9575cd;--p600:#673ab7;--p700:#512da8;
+  --g50:#fafafa;--g100:#f5f5f5;--g200:#eeeeee;--g300:#e0e0e0;
+  --g400:#bdbdbd;--g500:#9e9e9e;--g600:#757575;--g700:#616161;--g800:#424242;
+  --red:#e53935;--red-bg:#ffebee;--green:#2e7d32;--green-bg:#e8f5e9;
+  --yellow:#f57f17;--yellow-bg:#fff8e1;--orange:#e65100;--orange-bg:#fff3e0;
+  --sh-sm:0 1px 4px rgba(103,58,183,.08);--sh-lg:0 8px 32px rgba(103,58,183,.18);
+  --r:8px;--rm:12px;--rl:18px;--tr:.22s cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--g50);color:var(--g800);min-height:100vh;}
+
+/* Loading */
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px;}
+.spinner{width:40px;height:40px;border:3px solid var(--p200);border-top-color:var(--p400);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{font-size:14px;color:var(--g500);}
+.loading-overlay.hide{display:none;}
+
+/* LOGIN */
+#login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--p100),var(--p50));}
+.login-card{background:#fff;border-radius:var(--rl);padding:48px 40px;box-shadow:var(--sh-lg);width:100%;max-width:400px;}
+.login-logo{width:52px;height:52px;background:var(--p400);border-radius:14px;margin:0 auto 22px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;}
+.login-title{font-size:22px;font-weight:700;text-align:center;color:var(--g800);margin-bottom:6px;}
+.login-sub{font-size:14px;text-align:center;color:var(--g500);margin-bottom:30px;}
+.login-err{background:var(--red-bg);color:var(--red);font-size:13px;padding:10px 14px;border-radius:var(--r);margin-bottom:14px;display:none;line-height:1.6;}
+.login-err.show{display:block;}
+.login-lock{background:var(--orange-bg);color:var(--orange);font-size:13px;padding:12px 14px;border-radius:var(--r);margin-bottom:14px;display:none;text-align:center;line-height:1.7;}
+.login-lock.show{display:block;}
+.lg{margin-bottom:16px;}
+.lg label{display:block;font-size:13px;font-weight:600;color:var(--g600);margin-bottom:6px;}
+.lg input{width:100%;padding:11px 14px;border:1.5px solid var(--g300);border-radius:var(--r);font-size:15px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;}
+.lg input:focus{border-color:var(--p300);box-shadow:0 0 0 3px rgba(179,157,219,.18);}
+.lg input:disabled{background:var(--g100);color:var(--g400);cursor:not-allowed;}
+.btn-login{width:100%;padding:13px;background:var(--p400);color:#fff;border:none;border-radius:50px;font-size:16px;font-family:inherit;font-weight:500;cursor:pointer;transition:var(--tr);margin-top:4px;}
+.btn-login:hover:not(:disabled){background:var(--p600);}
+.btn-login:disabled{background:var(--g300);cursor:not-allowed;}
+.attempts-hint{font-size:12px;color:var(--g500);text-align:center;margin-top:10px;min-height:18px;}
+.attempts-hint.warn{color:var(--red);font-weight:600;}
+.back-link{text-align:center;margin-top:18px;font-size:13px;color:var(--g400);cursor:pointer;transition:color .2s;}
+.back-link:hover{color:var(--p400);}
+
+/* ADMIN SHELL */
+#admin-wrap{display:none;}
+#admin-wrap.show{display:block;}
+.topbar{background:#fff;border-bottom:1px solid var(--g200);height:58px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:200;box-shadow:var(--sh-sm);}
+.topbar-logo{font-size:16px;font-weight:700;color:var(--p600);display:flex;align-items:center;gap:8px;}
+.topbar-actions{display:flex;align-items:center;gap:14px;}
+.tb-btn{font-size:13px;cursor:pointer;padding:7px 16px;border-radius:50px;border:1px solid var(--p300);color:var(--p600);background:transparent;font-family:inherit;transition:background .2s;}
+.tb-btn:hover{background:var(--p100);}
+.tb-logout{font-size:13px;color:var(--g500);cursor:pointer;transition:color .2s;background:none;border:none;font-family:inherit;}
+.tb-logout:hover{color:var(--red);}
+.admin-body{display:flex;position:fixed;top:58px;left:0;right:0;bottom:0;}
+.sidebar{width:220px;background:#fff;border-right:1px solid var(--g200);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;}
+.sidebar-logo-area{padding:20px 22px 16px;border-bottom:1px solid var(--g200);margin-bottom:8px;}
+.sidebar-logo-area span{font-size:12px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:1px;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:13px 22px;font-size:14px;color:var(--g600);cursor:pointer;transition:var(--tr);border-left:3px solid transparent;user-select:none;}
+.nav-item:hover{background:var(--p50);color:var(--p600);}
+.nav-item.active{background:var(--p100);color:var(--p700);border-left-color:var(--p400);font-weight:700;}
+.nav-icon{font-size:18px;width:24px;text-align:center;flex-shrink:0;}
+.nav-label{flex:1;}
+.sidebar-footer{margin-top:auto;padding:16px 22px;border-top:1px solid var(--g200);}
+.sidebar-footer span{font-size:12px;color:var(--g400);}
+.main{flex:1;overflow-y:auto;padding:32px 40px;background:var(--g50);}
+.sec{display:none;}
+.sec.active{display:block;}
+.sec-title{font-size:20px;font-weight:700;color:var(--g800);margin-bottom:4px;}
+.sec-sub{font-size:14px;color:var(--g500);margin-bottom:26px;}
+.acard{background:#fff;border-radius:var(--rm);padding:26px;box-shadow:var(--sh-sm);margin-bottom:22px;}
+.acard-hdr{font-size:13px;font-weight:700;color:var(--g600);text-transform:uppercase;letter-spacing:.6px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--g200);}
+.frow{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;}
+.frow label{font-size:13px;font-weight:600;color:var(--g600);}
+.frow input,.frow textarea,.frow select{padding:10px 13px;border:1.5px solid var(--g300);border-radius:var(--r);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s;}
+.frow input:focus,.frow textarea:focus,.frow select:focus{border-color:var(--p300);box-shadow:0 0 0 3px rgba(179,157,219,.14);}
+.frow textarea{resize:vertical;min-height:80px;}
+.frow-hint{font-size:12px;color:var(--g500);margin-top:3px;}
+.btn-p{display:inline-flex;align-items:center;gap:6px;background:var(--p400);color:#fff;border:none;border-radius:50px;padding:10px 22px;font-size:14px;font-family:inherit;font-weight:500;cursor:pointer;transition:var(--tr);}
+.btn-p:hover{background:var(--p600);}
+.btn-s{display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--p600);border:1.5px solid var(--p300);border-radius:50px;padding:9px 18px;font-size:13px;font-family:inherit;cursor:pointer;transition:var(--tr);}
+.btn-s:hover{background:var(--p100);}
+.btn-xs-danger{background:var(--red-bg);color:var(--red);border:none;border-radius:6px;padding:5px 11px;font-size:12px;font-family:inherit;cursor:pointer;}
+.btn-xs-danger:hover{background:#ffcdd2;}
+.btn-xs-ok{background:var(--green-bg);color:var(--green);border:none;border-radius:6px;padding:5px 11px;font-size:12px;font-family:inherit;cursor:pointer;}
+.btn-xs-ok:hover{background:#c8e6c9;}
+.btn-xs-p{background:var(--p100);color:var(--p700);border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-family:inherit;cursor:pointer;}
+.btn-xs-p:hover{background:var(--p200);}
+
+/* SCHEDULE */
+.add-date-bar{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:22px;}
+.add-date-bar>div{display:flex;flex-direction:column;gap:4px;}
+.add-date-bar label{font-size:12px;font-weight:600;color:var(--g600);}
+.add-date-bar input{padding:9px 12px;border:1.5px solid var(--g300);border-radius:var(--r);font-size:14px;font-family:inherit;outline:none;}
+.add-date-bar input:focus{border-color:var(--p300);}
+.date-list{display:flex;flex-direction:column;gap:12px;}
+.no-dates{font-size:14px;color:var(--g400);padding:8px 0;}
+.date-block{border:1.5px solid var(--g200);border-radius:var(--rm);overflow:hidden;}
+.date-block-hdr{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:var(--p50);cursor:pointer;user-select:none;transition:background .18s;}
+.date-block-hdr:hover{background:var(--p100);}
+.dbh-left{display:flex;align-items:center;gap:10px;}
+.date-lbl{font-weight:700;color:var(--p700);font-size:15px;}
+.slot-cnt{background:var(--p200);color:var(--p700);font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600;}
+.date-chevron{color:var(--p400);font-size:17px;transition:transform .22s;}
+.date-chevron.open{transform:rotate(180deg);}
+.date-block-body{display:none;padding:18px;border-top:1px solid var(--g200);background:#fff;}
+.date-block-body.open{display:block;}
+.slot-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;min-height:32px;}
+.slot-tag{display:flex;align-items:center;gap:7px;background:var(--p100);border:1px solid var(--p200);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--p700);}
+.st-time{font-weight:700;}
+.st-quota{color:var(--p400);font-size:12px;}
+.st-del{background:none;border:none;cursor:pointer;color:var(--p300);font-size:15px;line-height:1;padding:0;transition:color .15s;}
+.st-del:hover{color:var(--red);}
+.no-slots-msg{font-size:13px;color:var(--g400);margin-bottom:14px;}
+.add-slot-box{background:var(--g50);border:1px dashed var(--g300);border-radius:var(--r);padding:14px 16px;}
+.add-slot-box-title{font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.add-slot-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
+.add-slot-row>div{display:flex;flex-direction:column;gap:4px;}
+.add-slot-row label{font-size:12px;font-weight:600;color:var(--g600);}
+.add-slot-row input{padding:8px 11px;border:1.5px solid var(--g300);border-radius:var(--r);font-size:14px;font-family:inherit;outline:none;}
+.add-slot-row input:focus{border-color:var(--p300);}
+.add-slot-row input[type="time"]{width:126px;}
+.add-slot-row input[type="number"]{width:76px;}
+.date-danger{margin-top:14px;padding-top:14px;border-top:1px solid var(--g200);}
+
+/* BOOKINGS */
+.bk-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.table-scroll{overflow-x:auto;border-radius:var(--r);border:1px solid var(--g200);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:var(--p50);color:var(--p600);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:11px 14px;text-align:left;white-space:nowrap;}
+td{padding:11px 14px;border-bottom:1px solid var(--g100);color:var(--g700);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--g50);}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-pending{background:var(--yellow-bg);color:var(--yellow);}
+.badge-confirmed{background:var(--green-bg);color:var(--green);}
+.badge-cancelled{background:var(--red-bg);color:var(--red);opacity:.75;}
+.tbl-acts{display:flex;gap:6px;}
+.empty-state{padding:32px;text-align:center;color:var(--g400);font-size:14px;}
+
+/* FIELDS */
+.field-list{display:flex;flex-direction:column;gap:9px;margin-bottom:22px;}
+.field-item{display:flex;align-items:center;gap:12px;background:var(--g50);border-radius:var(--r);padding:12px 14px;border:1px solid var(--g200);}
+.fi-info{flex:1;}
+.fi-name{font-size:14px;font-weight:600;color:var(--g700);}
+.fi-meta{font-size:12px;color:var(--g400);margin-top:2px;}
+.badge-req{font-size:11px;background:var(--p50);color:var(--p600);padding:2px 8px;border-radius:10px;margin-left:5px;font-weight:600;}
+.add-field-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.add-field-row>div{display:flex;flex-direction:column;gap:4px;}
+.add-field-row label{font-size:12px;font-weight:600;color:var(--g600);}
+.add-field-row input,.add-field-row select{padding:9px 12px;border:1.5px solid var(--g300);border-radius:var(--r);font-size:14px;font-family:inherit;outline:none;}
+.add-field-row input[type="text"]{width:160px;}
+.req-check{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--g600);cursor:pointer;padding-bottom:2px;}
+
+/* INFO / WARN BOX */
+.info-box{background:var(--p50);border-left:3px solid var(--p300);border-radius:var(--r);padding:14px 18px;font-size:13px;color:var(--p700);line-height:1.9;margin-bottom:18px;}
+
+/* Toast */
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(16px);background:rgba(66,66,66,.95);color:#fff;padding:10px 24px;border-radius:50px;font-size:14px;opacity:0;transition:all .28s;pointer-events:none;z-index:9999;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:768px){
+  .sidebar{width:64px;}
+  .nav-label,.sidebar-logo-area,.sidebar-footer{display:none;}
+  .nav-item{justify-content:center;padding:14px 0;}
+  .nav-icon{width:auto;font-size:20px;}
+  .main{padding:20px 14px;}
+}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+<div class="loading-overlay hide" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">載入中…</div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">⚙</div>
+    <h2 class="login-title">管理後台</h2>
+    <p class="login-sub">請輸入管理員帳號與密碼</p>
+    <div class="login-lock" id="login-lock"></div>
+    <div class="login-err" id="login-err"></div>
+    <div class="lg"><label>帳號</label><input type="text" id="l-user" placeholder="帳號"/></div>
+    <div class="lg"><label>密碼</label><input type="password" id="l-pass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="btn-login" id="login-btn" onclick="doLogin()">登入</button>
+    <div class="attempts-hint" id="attempts-hint"></div>
+    <p class="back-link" onclick="window.location.href='index.html'">← 返回前台</p>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-wrap">
+  <div class="topbar">
+    <div class="topbar-logo"><span>⚙</span>管理後台</div>
+    <div class="topbar-actions">
+      <button class="tb-btn" onclick="window.location.href='index.html'">← 前往前台</button>
+      <button class="tb-logout" onclick="doLogout()">登出</button>
+    </div>
+  </div>
+  <div class="admin-body">
+    <div class="sidebar">
+      <div class="sidebar-logo-area"><span>功能選單</span></div>
+      <div class="nav-item active" data-sec="home"     onclick="showSec('home')"    ><span class="nav-icon">🏠</span><span class="nav-label">首頁設定</span></div>
+      <div class="nav-item"        data-sec="schedule" onclick="showSec('schedule')"><span class="nav-icon">📅</span><span class="nav-label">日期與時段</span></div>
+      <div class="nav-item"        data-sec="bookings" onclick="showSec('bookings')"><span class="nav-icon">📋</span><span class="nav-label">預約清單</span></div>
+      <div class="nav-item"        data-sec="fields"   onclick="showSec('fields')"  ><span class="nav-icon">📝</span><span class="nav-label">欄位管理</span></div>
+      <div class="nav-item"        data-sec="system"   onclick="showSec('system')"  ><span class="nav-icon">🔑</span><span class="nav-label">系統設定</span></div>
+      <div class="sidebar-footer"><span>預約管理系統</span></div>
+    </div>
+
+    <div class="main">
+
+      <!-- ① HOME -->
+      <div class="sec active" id="sec-home">
+        <div class="sec-title">首頁設定</div>
+        <div class="sec-sub">調整前台首頁的標題、內文與背景圖片（儲存後所有裝置同步更新）</div>
+        <div class="acard">
+          <div class="acard-hdr">內容編輯</div>
+          <div class="frow"><label>標語（小標籤）</label><input type="text" id="s-badge"/></div>
+          <div class="frow"><label>主標題</label><input type="text" id="s-title"/></div>
+          <div class="frow"><label>內文說明</label><textarea id="s-body"></textarea></div>
+          <div class="frow"><label>背景圖片 URL</label><input type="url" id="s-bg" placeholder="https://..."/></div>
+          <button class="btn-p" onclick="saveHome()">💾 儲存並同步</button>
+        </div>
+      </div>
+
+      <!-- ② SCHEDULE -->
+      <div class="sec" id="sec-schedule">
+        <div class="sec-title">日期與時段設定</div>
+        <div class="sec-sub">設定後儲存，前台所有裝置即時更新</div>
+        <div class="acard">
+          <div class="acard-hdr">新增日期</div>
+          <div class="add-date-bar">
+            <div><label>選擇日期</label><input type="date" id="new-date"/></div>
+            <button class="btn-p" onclick="addDate()">＋ 新增日期</button>
+          </div>
+          <div class="date-list" id="date-list"></div>
+          <div style="margin-top:20px;">
+            <button class="btn-p" onclick="saveSchedule()">💾 儲存並同步所有時段</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ③ BOOKINGS -->
+      <div class="sec" id="sec-bookings">
+        <div class="sec-title">預約清單</div>
+        <div class="sec-sub">所有預約資料來自 Google 試算表，即時同步</div>
+        <div class="acard">
+          <div class="bk-toolbar">
+            <button class="btn-p" onclick="exportCSV()">📥 匯出 CSV</button>
+            <button class="btn-s" onclick="loadBookings(true)">🔄 重新整理</button>
+          </div>
+          <div class="table-scroll"><div id="bk-table-wrap"></div></div>
+        </div>
+      </div>
+
+      <!-- ④ FIELDS -->
+      <div class="sec" id="sec-fields">
+        <div class="sec-title">欄位管理</div>
+        <div class="sec-sub">新增或刪除預約表單的輸入欄位</div>
+        <div class="acard">
+          <div class="acard-hdr">目前欄位</div>
+          <div class="field-list" id="field-list"></div>
+          <div class="acard-hdr" style="margin-top:20px;">新增自訂欄位</div>
+          <div class="add-field-row">
+            <div><label>欄位名稱</label><input type="text" id="nf-label" placeholder="例：公司名稱"/></div>
+            <div>
+              <label>類型</label>
+              <select id="nf-type">
+                <option value="text">文字（單行）</option>
+                <option value="textarea">文字（多行）</option>
+                <option value="tel">電話號碼</option>
+                <option value="email">Email</option>
+                <option value="number">數字</option>
+              </select>
+            </div>
+            <div style="justify-content:flex-end;">
+              <label class="req-check"><input type="checkbox" id="nf-req"/> 必填</label>
+            </div>
+            <div style="justify-content:flex-end;padding-bottom:1px;">
+              <button class="btn-p" onclick="addField()">＋ 新增</button>
+            </div>
+          </div>
+          <div style="margin-top:20px;">
+            <button class="btn-p" onclick="saveFields()">💾 儲存並同步欄位</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ⑤ SYSTEM -->
+      <div class="sec" id="sec-system">
+        <div class="sec-title">系統設定</div>
+        <div class="sec-sub">管理員帳密設定（存於本機）</div>
+        <div class="acard">
+          <div class="acard-hdr">管理員帳密</div>
+          <div class="info-box">帳密存於本機瀏覽器，不會上傳至試算表。</div>
+          <div class="frow"><label>帳號</label><input type="text" id="sys-user"/></div>
+          <div class="frow"><label>新密碼（留空則不更改）</label><input type="password" id="sys-pass" placeholder="••••••"/></div>
+          <button class="btn-p" onclick="saveCreds()">💾 儲存帳密</button>
+        </div>
+        <div class="acard">
+          <div class="acard-hdr">登入鎖定設定</div>
+          <div class="frow">
+            <label>允許最大錯誤次數</label>
+            <input type="number" id="sys-max-attempts" min="1" max="20" style="width:100px;"/>
+          </div>
+          <div class="frow">
+            <label>鎖定時間（分鐘）</label>
+            <input type="number" id="sys-lock-duration" min="1" max="60" style="width:100px;"/>
+          </div>
+          <button class="btn-p" onclick="saveLockSettings()">💾 儲存鎖定設定</button>
+          <button class="btn-s" style="margin-left:10px;" onclick="clearLock()">🔓 立即解除鎖定</button>
+        </div>
+        <div class="acard">
+          <div class="acard-hdr">Google Apps Script 網址</div>
+          <div class="info-box">目前使用的網址已內建在程式碼中。如需更換，請聯絡開發者修改原始碼。</div>
+          <div class="frow"><label>目前網址</label><input type="text" readonly value="https://script.google.com/macros/s/AKfycbxQwDn6b79sbm1QAIDJN_iMsvsNa7maL0sNWKHRZ44dYADA6aCItTkM1DB-f6SvS9bXvw/exec" style="font-size:11px;color:var(--g500);background:var(--g50);"/></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbxQwDn6b79sbm1QAIDJN_iMsvsNa7maL0sNWKHRZ44dYADA6aCItTkM1DB-f6SvS9bXvw/exec';
+
+/* ═══ 時間／日期格式保護 ═══ */
+function fmtTime(t){
+  if(!t) return '—';
+  var s = String(t);
+  /* 含 GMT 或 ISO 格式（1899-12-30T...） */
+  if(s.indexOf('T') > -1 || s.indexOf('GMT') > -1 || s.indexOf('1899') > -1){
+    var d = new Date(t);
+    if(!isNaN(d)){
+      return ('0'+d.getUTCHours()).slice(-2) + ':' + ('0'+d.getUTCMinutes()).slice(-2);
+    }
+  }
+  return s.trim();
+}
+
+function fmtDate(t){
+  if(!t) return '—';
+  var s = String(t);
+  /* ISO 格式或 Date 物件 */
+  if(s.indexOf('T') > -1 || s.indexOf('GMT') > -1 || t instanceof Date){
+    var d = new Date(t);
+    if(!isNaN(d)){
+      return d.getFullYear() + '/' +
+        ('0'+(d.getMonth()+1)).slice(-2) + '/' +
+        ('0'+d.getDate()).slice(-2);
+    }
+  }
+  /* 已是 yyyy-MM-dd，轉成 yyyy/MM/dd */
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
+    return s.replace(/-/g, '/');
+  }
+  return s.trim();
+}
+
+/* ═══ CACHE ═══ */
+var DATA = { schedule:{}, bookings:[], fields:[], settings:{} };
+
+/* ═══ LOADING ═══ */
+function showLoading(msg){ document.getElementById('loading').classList.remove('hide'); document.getElementById('loading-text').textContent=msg||'處理中…'; }
+function hideLoading(){ document.getElementById('loading').classList.add('hide'); }
+
+/* ═══ TOAST ═══ */
+var _tt=null;
+function toast(msg){
+  var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(function(){ t.classList.remove('show'); },2500);
+}
+
+/* ═══ GAS ═══ */
+/* ═══ GAS 呼叫 ═══ */
+function gasGet(action){
+  return fetch(GAS_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: action, _read: true })
+  })
+  .then(function(r){ return r.json(); })
+  .catch(function(e){ console.error('gasGet error:', e); return {}; });
+}
+function gasPost(payload){
+  return fetch(GAS_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    mode: 'no-cors'
+  }).then(function(){ return { success: true }; })
+    .catch(function(){ return { success: false }; });
+}
+
+/* ═══ LOCK ═══ */
+function getLockState(){ try{ return JSON.parse(localStorage.getItem('adminLoginState')||'null')||{fails:0,lockedUntil:0}; }catch(e){ return {fails:0,lockedUntil:0}; } }
+function saveLockState(s){ localStorage.setItem('adminLoginState',JSON.stringify(s)); }
+function clearLockState(){ localStorage.removeItem('adminLoginState'); }
+function isLocked(){ var s=getLockState(); return s.lockedUntil&&Date.now()<s.lockedUntil; }
+function getLockRemainingMin(){ return Math.ceil((getLockState().lockedUntil-Date.now())/60000); }
+function getSecSettings(){ try{ return JSON.parse(localStorage.getItem('adminSec')||'null')||{maxAttempts:5,lockDuration:15,user:'admin',pass:'1234'}; }catch(e){ return {maxAttempts:5,lockDuration:15,user:'admin',pass:'1234'}; } }
+function saveSecSettings(s){ localStorage.setItem('adminSec',JSON.stringify(s)); }
+
+function initLoginPage(){
+  var sec=getSecSettings();
+  if(isLocked()){ showLockUI(getLockRemainingMin()); startLockCountdown(); }
+  else {
+    var s=getLockState(); var left=sec.maxAttempts-s.fails;
+    if(s.fails>0&&left>0){ var h=document.getElementById('attempts-hint'); h.textContent='剩餘嘗試次數：'+left+' 次'; h.className='attempts-hint warn'; }
+  }
+}
+
+function showLockUI(mins){
+  document.getElementById('login-lock').innerHTML='🔒 登入已鎖定<br>請 <strong>'+mins+'</strong> 分鐘後再試';
+  document.getElementById('login-lock').classList.add('show');
+  document.getElementById('login-err').classList.remove('show');
+  document.getElementById('l-user').disabled=true;
+  document.getElementById('l-pass').disabled=true;
+  document.getElementById('login-btn').disabled=true;
+}
+function unlockUI(){
+  document.getElementById('login-lock').classList.remove('show');
+  document.getElementById('l-user').disabled=false;
+  document.getElementById('l-pass').disabled=false;
+  document.getElementById('login-btn').disabled=false;
+}
+var _lockTimer=null;
+function startLockCountdown(){
+  clearInterval(_lockTimer);
+  _lockTimer=setInterval(function(){
+    if(!isLocked()){ clearInterval(_lockTimer); unlockUI(); clearLockState(); document.getElementById('attempts-hint').textContent=''; }
+    else{ document.getElementById('login-lock').innerHTML='🔒 登入已鎖定<br>請 <strong>'+getLockRemainingMin()+'</strong> 分鐘後再試'; }
+  },10000);
+}
+
+/* ═══ LOGIN / LOGOUT ═══ */
+function doLogin(){
+  if(isLocked()){ showLockUI(getLockRemainingMin()); return; }
+  var sec=getSecSettings();
+  var u=document.getElementById('l-user').value.trim();
+  var p=document.getElementById('l-pass').value;
+  if(u===sec.user&&p===sec.pass){
+    clearLockState();
+    document.getElementById('login-err').classList.remove('show');
+    document.getElementById('login-wrap').style.display='none';
+    document.getElementById('admin-wrap').classList.add('show');
+    showSec('home');
+    loadAllData();
+  } else {
+    var s=getLockState(); s.fails=(s.fails||0)+1;
+    if(s.fails>=sec.maxAttempts){ s.lockedUntil=Date.now()+sec.lockDuration*60000; saveLockState(s); showLockUI(sec.lockDuration); startLockCountdown(); }
+    else{ saveLockState(s); var left=sec.maxAttempts-s.fails; document.getElementById('login-err').innerHTML='帳號或密碼錯誤'; document.getElementById('login-err').classList.add('show'); var h=document.getElementById('attempts-hint'); h.textContent='剩餘嘗試次數：'+left+' 次'; h.className='attempts-hint'+(left<=2?' warn':''); }
+    document.getElementById('l-pass').value='';
+  }
+}
+function doLogout(){ document.getElementById('admin-wrap').classList.remove('show'); document.getElementById('login-wrap').style.display='flex'; document.getElementById('l-pass').value=''; }
+
+/* ═══ LOAD ALL ═══ */
+function loadAllData(){
+  showLoading('從 Google 試算表載入資料…');
+  Promise.all([
+    gasGet('getSettings'),
+    gasGet('getSchedule'),
+    gasGet('getBookings'),
+    gasGet('getFields')
+  ]).then(function(res){
+    DATA.settings = res[0].settings || {};
+    DATA.schedule  = res[1].schedule  || {};
+    DATA.bookings  = res[2].bookings  || [];
+    DATA.fields    = res[3].fields    || defaultFields();
+    hideLoading();
+    loadHomeForm();
+  }).catch(function(){ hideLoading(); toast('⚠️ 載入失敗，請確認網路連線'); });
+}
+
+/* ═══ SECTION ROUTER ═══ */
+function showSec(name){
+  document.querySelectorAll('.sec').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('sec-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelector('[data-sec="'+name+'"]').classList.add('active');
+  if(name==='home')     loadHomeForm();
+  if(name==='schedule') renderDateList();
+  if(name==='bookings') renderBookings();
+  if(name==='fields')   renderFields();
+  if(name==='system')   loadSystem();
+}
+
+/* ═══ ① HOME ═══ */
+function loadHomeForm(){
+  var s=DATA.settings;
+  document.getElementById('s-badge').value=s.badge||'';
+  document.getElementById('s-title').value=s.title||'';
+  document.getElementById('s-body').value=s.body||'';
+  document.getElementById('s-bg').value=s.bg||'';
+}
+function saveHome(){
+  DATA.settings.badge=document.getElementById('s-badge').value;
+  DATA.settings.title=document.getElementById('s-title').value;
+  DATA.settings.body=document.getElementById('s-body').value;
+  DATA.settings.bg=document.getElementById('s-bg').value;
+  showLoading('儲存首頁設定…');
+  gasPost({action:'saveSettings',settings:DATA.settings}).then(function(){
+    hideLoading(); toast('✅ 首頁設定已儲存並同步');
+  });
+}
+
+/* ═══ ② SCHEDULE ═══ */
+function renderDateList(){
+  var container=document.getElementById('date-list'); container.innerHTML='';
+  var dates=Object.keys(DATA.schedule).sort();
+  if(!dates.length){ container.innerHTML='<p class="no-dates">尚未新增任何日期</p>'; return; }
+  dates.forEach(function(date){ container.appendChild(makeDateBlock(date)); });
+}
+
+function makeDateBlock(date){
+  var slots=DATA.schedule[date]||[];
+  var block=document.createElement('div'); block.className='date-block'; block.id='db-'+date;
+  var hdr=document.createElement('div'); hdr.className='date-block-hdr';
+  hdr.innerHTML='<div class="dbh-left"><span class="date-lbl">'+date+'</span><span class="slot-cnt" id="sc-'+date+'">'+slots.length+' 個時段</span></div><span class="date-chevron" id="chev-'+date+'">▼</span>';
+  hdr.onclick=function(){ toggleBlock(date); };
+  var body=document.createElement('div'); body.className='date-block-body'; body.id='dbb-'+date;
+  var tagWrap=document.createElement('div'); tagWrap.className='slot-tags'; tagWrap.id='st-'+date;
+  refreshSlotTags(date,tagWrap); body.appendChild(tagWrap);
+  var addBox=document.createElement('div'); addBox.className='add-slot-box';
+  addBox.innerHTML='<div class="add-slot-box-title">新增時段</div>';
+  var row=document.createElement('div'); row.className='add-slot-row';
+  var tW=document.createElement('div'); tW.innerHTML='<label>時間</label>';
+  var tIn=document.createElement('input'); tIn.type='time'; tIn.id='ti-'+date; tW.appendChild(tIn);
+  var qW=document.createElement('div'); qW.innerHTML='<label>名額上限</label>';
+  var qIn=document.createElement('input'); qIn.type='number'; qIn.id='qi-'+date; qIn.value=3; qIn.min=1; qIn.max=99; qW.appendChild(qIn);
+  var bW=document.createElement('div'); bW.style.paddingBottom='1px';
+  var ab=document.createElement('button'); ab.className='btn-p'; ab.style.fontSize='13px'; ab.style.padding='9px 18px'; ab.textContent='＋ 新增時段';
+  (function(dt,ti,qi){ ab.onclick=function(){ addSlot(dt,ti,qi); }; })(date,tIn,qIn);
+  bW.appendChild(ab); row.appendChild(tW); row.appendChild(qW); row.appendChild(bW); addBox.appendChild(row); body.appendChild(addBox);
+  var danger=document.createElement('div'); danger.className='date-danger';
+  var dW=document.createElement('div'); dW.style.cssText='display:flex;gap:8px;align-items:center;';
+  var dB=document.createElement('button'); dB.className='btn-xs-danger'; dB.style.fontSize='13px'; dB.style.padding='8px 16px'; dB.textContent='🗑 刪除此日期';
+  (function(dt,dw){ dB.onclick=function(){ dw.innerHTML=''; var msg=document.createElement('span'); msg.textContent='確定刪除 '+dt+'？'; msg.style.cssText='font-size:13px;color:var(--g600);'; var yes=document.createElement('button'); yes.className='btn-xs-danger'; yes.style.padding='6px 14px'; yes.textContent='確定'; yes.onclick=function(){ deleteDate(dt); }; var no=document.createElement('button'); no.className='btn-xs-p'; no.style.padding='6px 14px'; no.textContent='取消'; no.onclick=function(){ dw.innerHTML=''; dw.appendChild(dB); }; dw.appendChild(msg); dw.appendChild(yes); dw.appendChild(no); }; })(date,dW);
+  dW.appendChild(dB); danger.appendChild(dW); body.appendChild(danger);
+  block.appendChild(hdr); block.appendChild(body);
+  return block;
+}
+
+function refreshSlotTags(date,container){
+  container.innerHTML='';
+  var slots=DATA.schedule[date]||[];
+  if(!slots.length){ var m=document.createElement('p'); m.className='no-slots-msg'; m.textContent='尚無時段，請在下方新增。'; container.appendChild(m); return; }
+  slots.forEach(function(slot,idx){
+    var tag=document.createElement('div'); tag.className='slot-tag';
+    tag.innerHTML='<span class="st-time">'+slot.time+'</span><span class="st-quota">名額 '+slot.quota+'</span>';
+    var del=document.createElement('button'); del.className='st-del'; del.textContent='✕';
+    (function(dt,i){ del.onclick=function(e){ e.stopPropagation(); deleteSlot(dt,i); }; })(date,idx);
+    tag.appendChild(del); container.appendChild(tag);
+  });
+}
+
+function toggleBlock(date){ var b=document.getElementById('dbb-'+date),c=document.getElementById('chev-'+date),o=b.classList.contains('open'); b.classList.toggle('open',!o); c.classList.toggle('open',!o); }
+function openBlock(date){ var b=document.getElementById('dbb-'+date),c=document.getElementById('chev-'+date); if(b)b.classList.add('open'); if(c)c.classList.add('open'); }
+
+function addDate(){
+  var val=document.getElementById('new-date').value;
+  if(!val){ toast('⚠️ 請先選擇日期'); return; }
+  if(DATA.schedule[val]){ toast('⚠️ 此日期已存在'); return; }
+  DATA.schedule[val]=[]; document.getElementById('new-date').value='';
+  renderDateList(); setTimeout(function(){ openBlock(val); },40);
+  toast('✅ 已新增 '+val+'，設定完時段後請按「儲存並同步」');
+}
+
+function deleteDate(date){
+  delete DATA.schedule[date];
+  var block=document.getElementById('db-'+date); if(block)block.remove();
+  var c=document.getElementById('date-list'); if(!c.children.length) c.innerHTML='<p class="no-dates">尚未新增任何日期</p>';
+  toast('🗑 日期已移除，請按「儲存並同步」');
+}
+
+function addSlot(date,tIn,qIn){
+  var time=tIn.value,quota=parseInt(qIn.value)||1;
+  if(!time){ toast('⚠️ 請選擇時間'); return; }
+  DATA.schedule[date]=DATA.schedule[date]||[];
+  if(DATA.schedule[date].some(function(s){ return s.time===time; })){ toast('⚠️ 此時段已存在'); return; }
+  DATA.schedule[date].push({time:time,quota:quota});
+  DATA.schedule[date].forEach(function(s){ s.time=fmtTime(s.time); });
+  DATA.schedule[date].sort(function(a,b){ return a.time.localeCompare(b.time); });
+  var tw=document.getElementById('st-'+date); if(tw)refreshSlotTags(date,tw);
+  var sc=document.getElementById('sc-'+date); if(sc)sc.textContent=DATA.schedule[date].length+' 個時段';
+  tIn.value=''; qIn.value=3; toast('✅ 時段已加入，請記得按「儲存並同步」');
+}
+
+function deleteSlot(date,idx){
+  DATA.schedule[date].splice(idx,1);
+  var tw=document.getElementById('st-'+date); if(tw)refreshSlotTags(date,tw);
+  var sc=document.getElementById('sc-'+date); if(sc)sc.textContent=DATA.schedule[date].length+' 個時段';
+  toast('🗑 時段已移除，請記得按「儲存並同步」');
+}
+
+function saveSchedule(){
+  showLoading('儲存時段設定…');
+  gasPost({action:'saveSchedule',schedule:DATA.schedule}).then(function(){
+    hideLoading(); toast('✅ 日期時段已儲存並同步，前台即時生效');
+  });
+}
+
+/* ═══ ③ BOOKINGS ═══ */
+function loadBookings(force){
+  if(!force&&DATA.bookings.length){ renderBookings(); return; }
+  showLoading('載入預約清單…');
+  gasGet('getBookings').then(function(res){
+    DATA.bookings=res.bookings||[]; hideLoading(); renderBookings();
+  });
+}
+
+function renderBookings(){
+  var wrap=document.getElementById('bk-table-wrap');
+  if(!DATA.bookings.length){ wrap.innerHTML='<div class="empty-state">目前沒有任何預約紀錄</div>'; return; }
+  var cols=['日期','時段']; DATA.fields.forEach(function(f){ cols.push(f.label); }); cols.push('建立時間','狀態','操作');
+  var html='<table><thead><tr>'; cols.forEach(function(c){ html+='<th>'+c+'</th>'; }); html+='</tr></thead><tbody>';
+  DATA.bookings.forEach(function(b,i){
+    var sl={pending:'待確認',confirmed:'已確認',cancelled:'已取消'}[b.status]||b.status;
+    var bc='badge-'+(b.status||'pending');
+    html+='<tr><td>'+fmtDate(b.date)+'</td><td>'+fmtTime(b.time)+'</td>';
+    DATA.fields.forEach(function(f){ html+='<td>'+(b[f.id]||b[f.label]||'—')+'</td>'; });
+    html+='<td>'+(b.createdAt||'—')+'</td><td><span class="badge '+bc+'">'+sl+'</span></td>';
+    html+='<td><div class="tbl-acts">';
+    if(b.status!=='confirmed') html+='<button class="btn-xs-ok" onclick="setStatus('+i+',\'confirmed\')">確認</button>';
+    if(b.status!=='cancelled') html+='<button class="btn-xs-danger" onclick="setStatus('+i+',\'cancelled\')">取消</button>';
+    html+='</div></td></tr>';
+  });
+  html+='</tbody></table>'; wrap.innerHTML=html;
+}
+
+function setStatus(i,status){
+  showLoading('更新狀態…');
+  gasPost({action:'updateBookingStatus',index:i,status:status}).then(function(){
+    DATA.bookings[i].status=status; hideLoading(); renderBookings();
+    toast('✅ 狀態已更新為「'+{pending:'待確認',confirmed:'已確認',cancelled:'已取消'}[status]+'」');
+  });
+}
+
+function exportCSV(){
+  if(!DATA.bookings.length){ toast('⚠️ 目前沒有預約資料可匯出'); return; }
+  var h=['日期','時段']; DATA.fields.forEach(function(f){ h.push(f.label); }); h.push('建立時間','狀態');
+  var rows=[h.join(',')];
+  DATA.bookings.forEach(function(b){
+    var r=[b.date||'',b.time||'']; DATA.fields.forEach(function(f){ r.push('"'+(b[f.id]||b[f.label]||'').toString().replace(/"/g,'""')+'"'); });
+    r.push(b.createdAt||'',b.status||''); rows.push(r.join(','));
+  });
+  var blob=new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='預約紀錄_'+new Date().toLocaleDateString('zh-TW')+'.csv'; a.click();
+  toast('📥 CSV 已下載');
+}
+
+/* ═══ ④ FIELDS ═══ */
+function defaultFields(){
+  return [
+    {id:'name',label:'姓名',type:'text',required:true},
+    {id:'phone',label:'手機號碼',type:'tel',required:true},
+    {id:'email',label:'Gmail',type:'email',required:true},
+    {id:'note',label:'其他備註',type:'textarea',required:false}
+  ];
+}
+
+function renderFields(){
+  var list=document.getElementById('field-list'); list.innerHTML='';
+  var types={text:'文字（單行）',textarea:'文字（多行）',tel:'電話號碼',email:'Email',number:'數字'};
+  if(!DATA.fields.length){ list.innerHTML='<p style="color:var(--g400);font-size:14px;">尚無欄位</p>'; return; }
+  DATA.fields.forEach(function(f,i){
+    var item=document.createElement('div'); item.className='field-item';
+    var info=document.createElement('div'); info.className='fi-info';
+    info.innerHTML='<div class="fi-name">'+f.label+(f.required?'<span class="badge-req">必填</span>':'')+'</div><div class="fi-meta">類型：'+(types[f.type]||f.type)+'</div>';
+    item.appendChild(info);
+    var aw=document.createElement('div'); aw.style.cssText='display:flex;gap:6px;align-items:center;';
+    var db=document.createElement('button'); db.className='btn-xs-danger'; db.textContent='刪除';
+    db.onclick=function(){ aw.innerHTML=''; var msg=document.createElement('span'); msg.textContent='確定刪除？'; msg.style.cssText='font-size:13px;color:var(--g600);'; var yes=document.createElement('button'); yes.className='btn-xs-danger'; yes.textContent='確定'; yes.onclick=function(){ DATA.fields.splice(i,1); renderFields(); toast('🗑 已移除，請按「儲存並同步欄位」'); }; var no=document.createElement('button'); no.className='btn-xs-p'; no.textContent='取消'; no.onclick=function(){ renderFields(); }; aw.appendChild(msg); aw.appendChild(yes); aw.appendChild(no); };
+    aw.appendChild(db); item.appendChild(aw); list.appendChild(item);
+  });
+}
+
+function addField(){
+  var label=document.getElementById('nf-label').value.trim();
+  if(!label){ toast('⚠️ 請輸入欄位名稱'); return; }
+  var type=document.getElementById('nf-type').value;
+  var req=document.getElementById('nf-req').checked;
+  DATA.fields.push({id:'c_'+Date.now(),label:label,type:type,required:req});
+  document.getElementById('nf-label').value=''; document.getElementById('nf-req').checked=false;
+  renderFields(); toast('✅ 已加入，請按「儲存並同步欄位」');
+}
+
+function saveFields(){
+  showLoading('儲存欄位設定…');
+  gasPost({action:'saveFields',fields:DATA.fields}).then(function(){
+    hideLoading(); toast('✅ 欄位已儲存並同步');
+  });
+}
+
+/* ═══ ⑤ SYSTEM ═══ */
+function loadSystem(){
+  var sec=getSecSettings();
+  document.getElementById('sys-user').value=sec.user||'admin';
+  document.getElementById('sys-pass').value='';
+  document.getElementById('sys-max-attempts').value=sec.maxAttempts||5;
+  document.getElementById('sys-lock-duration').value=sec.lockDuration||15;
+}
+function saveCreds(){
+  var sec=getSecSettings();
+  var u=document.getElementById('sys-user').value.trim();
+  var p=document.getElementById('sys-pass').value;
+  if(u)sec.user=u; if(p)sec.pass=p;
+  saveSecSettings(sec); document.getElementById('sys-pass').value='';
+  toast('✅ 帳密已儲存');
+}
+function saveLockSettings(){
+  var sec=getSecSettings();
+  var ma=parseInt(document.getElementById('sys-max-attempts').value)||5;
+  var ld=parseInt(document.getElementById('sys-lock-duration').value)||15;
+  if(ma<1||ma>20){ toast('⚠️ 錯誤次數請設 1～20'); return; }
+  if(ld<1||ld>60){ toast('⚠️ 鎖定時間請設 1～60'); return; }
+  sec.maxAttempts=ma; sec.lockDuration=ld;
+  saveSecSettings(sec); toast('✅ 鎖定設定已儲存');
+}
+function clearLock(){ clearLockState(); toast('🔓 鎖定已解除'); }
+
+/* ═══ INIT ═══ */
+initLoginPage();
+</script>
+</body>
+</html>
